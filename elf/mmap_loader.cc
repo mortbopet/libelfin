@@ -8,10 +8,10 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/mman.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
+
+#include "external/cpp-mmaplib/mmaplib.h"
 
 using namespace std;
 
@@ -21,40 +21,27 @@ class mmap_loader : public loader
 {
         void *base;
         size_t lim;
+        std::unique_ptr<mmaplib::mmap> _mmap;
 
 public:
-        mmap_loader(int fd)
+        mmap_loader(const char* path)
         {
-                off_t end = lseek(fd, 0, SEEK_END);
-                if (end == (off_t)-1)
-                        throw system_error(errno, system_category(),
-                                           "finding file length");
-                lim = end;
-
-                base = mmap(nullptr, lim, PROT_READ, MAP_SHARED, fd, 0);
-                if (base == MAP_FAILED)
-                        throw system_error(errno, system_category(),
-                                           "mmap'ing file");
-                close(fd);
-        }
-
-        ~mmap_loader()
-        {
-                munmap(base, lim);
+                _mmap = std::make_unique<mmaplib::mmap>(path);
+                lim = _mmap->size();
         }
 
         const void *load(off_t offset, size_t size)
         {
                 if (offset + size > lim)
                         throw range_error("offset exceeds file size");
-                return (const char*)base + offset;
+                return (const char*)_mmap->data() + offset;
         }
 };
 
 std::shared_ptr<loader>
-create_mmap_loader(int fd)
+create_mmap_loader(const char* path)
 {
-        return make_shared<mmap_loader>(fd);
+        return make_shared<mmap_loader>(path);
 }
 
 ELFPP_END_NAMESPACE
