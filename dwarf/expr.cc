@@ -88,10 +88,6 @@ expr::evaluate(expr_context *ctx, const std::initializer_list<taddr> &arguments)
 #pragma GCC diagnostic warning "-Wswitch-enum"
                 DW_OP op = (DW_OP)cur.fixed<ubyte>();
                 switch (op) {
-                        // 2.5.1.1 Literal encodings
-                case DW_OP::lit0...DW_OP::lit31:
-                        stack.push_back((unsigned)op - (unsigned)DW_OP::lit0);
-                        break;
                 case DW_OP::addr:
                         stack.push_back(cur.address());
                         break;
@@ -130,11 +126,6 @@ expr::evaluate(expr_context *ctx, const std::initializer_list<taddr> &arguments)
                 case DW_OP::fbreg:
                         // XXX
                         throw runtime_error("DW_OP_fbreg not implemented");
-                case DW_OP::breg0...DW_OP::breg31:
-                        tmp1.u = (unsigned)op - (unsigned)DW_OP::breg0;
-                        tmp2.s = cur.sleb128();
-                        stack.push_back((int64_t)ctx->reg(tmp1.u) + tmp2.s);
-                        break;
                 case DW_OP::bregx:
                         tmp1.u = cur.uleb128();
                         tmp2.s = cur.sleb128();
@@ -364,11 +355,6 @@ expr::evaluate(expr_context *ctx, const std::initializer_list<taddr> &arguments)
                 case DW_OP::nop:
                         break;
 
-                        // 2.6.1.1.2 Register location descriptions
-                case DW_OP::reg0...DW_OP::reg31:
-                        result.location_type = expr_result::type::reg;
-                        result.value = (unsigned)op - (unsigned)DW_OP::reg0;
-                        break;
                 case DW_OP::regx:
                         result.location_type = expr_result::type::reg;
                         result.value = cur.uleb128();
@@ -392,14 +378,26 @@ expr::evaluate(expr_context *ctx, const std::initializer_list<taddr> &arguments)
                 case DW_OP::bit_piece:
                         // XXX
                         throw runtime_error(to_string(op) + " not implemented");
-
-                case DW_OP::lo_user...DW_OP::hi_user:
-                        // XXX We could let the context evaluate this,
-                        // but it would need access to the cursor.
-                        throw expr_error("unknown user op " + to_string(op));
-
-                default:
+                default: {
+                        if(DW_OP::lo_user <= op && op <= DW_OP::hi_user) {
+                                // XXX We could let the context evaluate this,
+                                // but it would need access to the cursor.
+                                throw expr_error("unknown user op " + to_string(op));
+                        } else if  (DW_OP::reg0 <= op && op <= DW_OP::reg31) {
+                                // 2.6.1.1.2 Register location descriptions
+                                result.location_type = expr_result::type::reg;
+                                result.value = (unsigned)op - (unsigned)DW_OP::reg0;
+                        } else if (DW_OP::lit0 <= op && op <= DW_OP::lit31) {
+                                 // 2.5.1.1 Literal encodings
+                                stack.push_back((unsigned)op - (unsigned)DW_OP::lit0);
+                        } else if (DW_OP::breg0 <= op && op <= DW_OP::breg31) {
+                                tmp1.u = (unsigned)op - (unsigned)DW_OP::breg0;
+                                tmp2.s = cur.sleb128();
+                                stack.push_back((int64_t)ctx->reg(tmp1.u) + tmp2.s);
+                        }
+                        else
                         throw expr_error("bad operation " + to_string(op));
+                }
                 }
 #pragma GCC diagnostic pop
 #undef CHECK
