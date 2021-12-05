@@ -133,13 +133,14 @@ resolve_type(DW_AT name, DW_FORM form)
                 case DW_AT::ranges:
                         return value::type::rangelist;
 
-                case DW_AT::lo_user...DW_AT::hi_user:
-                        //HACK: ignore vendor extensions
-                        return value::type::invalid;
-
-                default:
+                default: {
+                        if(DW_AT::lo_user <= name && name <= DW_AT::hi_user) {
+                                //HACK: ignore vendor extensions
+                                return value::type::invalid;
+                        }
                         throw format_error("DW_FORM_sec_offset not expected for attribute " +
                                            to_string(name));
+                }
                 }
         }
         throw format_error("unknown attribute form " + to_string(form));
