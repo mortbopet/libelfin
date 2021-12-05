@@ -23,21 +23,14 @@ set(dwarf_headers
 set(ENUM_PRINT ${CMAKE_CURRENT_SOURCE_DIR}/elf/enum-print.py)
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/elf/to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "// Automatically generated" > to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "// DO NOT EDIT" >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "#include \\\"elf/data.hh\\\"" >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "#include \\\"elf/to_hex.hh\\\"" >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "ELFPP_BEGIN_NAMESPACE" >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/buildUtils/gen_elf_to_string.cc to_string.cc
     COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} -u --hex --no-type --mask shf --mask pf -x loos -x hios -x loproc -x hiproc < ${CMAKE_CURRENT_SOURCE_DIR}/elf/data.hh >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo "ELFPP_END_NAMESPACE" >> to_string.cc
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/elf)
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dwarf/to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "// Automatically generated" > to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "// DO NOT EDIT dd" >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "#include \\\"dwarf/internal.hh\\\"" >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo "DWARFPP_BEGIN_NAMESPACE" >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/buildUtils/gen_dwarf_to_string.cc to_string.cc
     COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} <  ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/dwarf++.hh >> to_string.cc
     COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} -s _ -u --hex -x hi_user -x lo_user < ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/data.hh >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo "DWARFPP_END_NAMESPACE" >> to_string.cc
