@@ -24,6 +24,25 @@ enum class byte_order
         msb
 };
 
+inline uint32_t bswap32_internal(uint32_t x) {
+        return  ((x & 0xFF000000) >> 24u) |
+                ((x & 0x00FF0000) >> 8u) |
+                ((x & 0x0000FF00) << 8u) |
+                ((x & 0xFF0000FF) << 24u);
+}
+
+inline uint64_t bswap64_internal(uint64_t x) {
+        return
+                ((x & 0xFF00000000000000u) >> 56u) |
+                ((x & 0x00FF000000000000u) >> 40u) |
+                ((x & 0x0000FF0000000000u) >> 24u) |
+                ((x & 0x000000FF00000000u) >>  8u) |
+                ((x & 0x00000000FF000000u) <<  8u) |      
+                ((x & 0x0000000000FF0000u) << 24u) |
+                ((x & 0x000000000000FF00u) << 40u) |
+                ((x & 0x00000000000000FFu) << 56u);
+}
+
 /**
  * Return either byte_order::lsb or byte_order::msb.  If the argument
  * is byte_order::native, it will be resolved to whatever the native
@@ -70,9 +89,9 @@ swizzle(T v, byte_order from, byte_order to)
                 return (T)(((x&0xFF) << 8) | (x >> 8));
         }
         case 4:
-                return (T)__builtin_bswap32((std::uint32_t)v);
+                return (T)bswap32_internal((std::uint32_t)v);
         case 8:
-                return (T)__builtin_bswap64((std::uint64_t)v);
+                return (T)bswap64_internal((std::uint64_t)v);
         }
 }
 
