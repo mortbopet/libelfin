@@ -10,6 +10,15 @@ using namespace std;
 
 DWARFPP_BEGIN_NAMESPACE
 
+static bool isAbsolute(const string& path) {
+#ifdef UNIX
+    return !path.empty() && path[0] == '/';
+#endif
+#ifdef WIN32
+    return !path.empty() && (path.find(":/") != std::string::npos);
+#endif
+}
+
 // The expected number of arguments for standard opcodes.  This is
 // used to check the opcode_lengths header field for compatibility.
 static const int opcode_lengths[] = {
@@ -128,7 +137,7 @@ line_table::line_table(const shared_ptr<section> &sec, section_offset offset,
                         break;
                 if (incdir.back() != '/')
                         incdir += '/';
-                if (incdir[0] == '/')
+                if (isAbsolute(incdir))
                         m->include_directories.push_back(move(incdir));
                 else
                         m->include_directories.push_back(comp_dir + incdir);
@@ -138,7 +147,7 @@ line_table::line_table(const shared_ptr<section> &sec, section_offset offset,
         string file_name;
         // File name 0 is implicitly the compilation unit file name.
         // cu_name can be relative to comp_dir or absolute.
-        if (!cu_name.empty() && cu_name[0] == '/')
+        if(isAbsolute(cu_name))
                 m->file_names.emplace_back(cu_name);
         else
                 m->file_names.emplace_back(comp_dir + cu_name);
@@ -217,7 +226,7 @@ line_table::impl::read_file_entry(cursor *cur, bool in_header)
                 return true;
         last_file_name_end = cur->get_section_offset();
 
-        if (file_name[0] == '/')
+        if (isAbsolute(file_name))
                 file_names.emplace_back(move(file_name), mtime, length);
         else if (dir_index < include_directories.size())
                 file_names.emplace_back(
