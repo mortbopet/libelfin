@@ -38,7 +38,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E echo "// DO NOT EDIT dd" >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo "#include \\\"dwarf/internal.hh\\\"" >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo "DWARFPP_BEGIN_NAMESPACE" >> to_string.cc
-    COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} <  ${CMAKE_CURRENT_SOURCE_DIR}/dwarf++.hh >> to_string.cc
+    COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} <  ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/dwarf++.hh >> to_string.cc
     COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} -s _ -u --hex -x hi_user -x lo_user < ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/data.hh >> to_string.cc
     COMMAND ${CMAKE_COMMAND} -E echo "DWARFPP_END_NAMESPACE" >> to_string.cc
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dwarf)
