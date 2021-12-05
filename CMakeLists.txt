@@ -19,43 +19,43 @@ set(dwarf_headers
     ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/dwarf++.hh
     ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/small_vector.hh)
 
+# Generate to_string implementations for elf and dwarf libraries
+set(ENUM_PRINT ${CMAKE_CURRENT_SOURCE_DIR}/elf/enum-print.py)
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/elf/to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo '// Automatically generated' > to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo '// DO NOT EDIT' >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo '\#include \"data.hh\"' >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo '\#include \"to_hex.hh\"' >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo 'ELFPP_BEGIN_NAMESPACE' >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
-    COMMAND ${PYTHON_EXECUTABLE} enum-print.py -u --hex --no-type --mask shf --mask pf -x loos -x hios -x loproc -x hiproc < data.hh >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo 'ELFPP_END_NAMESPACE' >> to_string.cc
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/elf/enum-print.py ${CMAKE_CURRENT_SOURCE_DIR}/elf/data.hh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/elf)
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/elf/to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "// Automatically generated" > to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "// DO NOT EDIT" >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "#include \\\"elf/data.hh\\\"" >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "#include \\\"elf/to_hex.hh\\\"" >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "ELFPP_BEGIN_NAMESPACE" >> to_string.cc
+    COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} -u --hex --no-type --mask shf --mask pf -x loos -x hios -x loproc -x hiproc < ${CMAKE_CURRENT_SOURCE_DIR}/elf/data.hh >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "ELFPP_END_NAMESPACE" >> to_string.cc
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/elf)
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo '// Automatically generated' > to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo '// DO NOT EDIT' >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo '\#include \"internal.hh\"' >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo 'DWARFPP_BEGIN_NAMESPACE' >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo >> to_string.cc
-    COMMAND ${PYTHON_EXECUTABLE} ../elf/enum-print.py < dwarf++.hh >> to_string.cc
-    COMMAND ${PYTHON_EXECUTABLE} ../elf/enum-print.py -s _ -u --hex -x hi_user -x lo_user < data.hh >> to_string.cc
-    COMMAND ${CMAKE_COMMAND} -E echo 'DWARFPP_END_NAMESPACE' >> to_string.cc
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/elf/enum-print.py ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/data.hh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dwarf)
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dwarf/to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "// Automatically generated" > to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "// DO NOT EDIT dd" >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "#include \\\"dwarf/internal.hh\\\"" >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "DWARFPP_BEGIN_NAMESPACE" >> to_string.cc
+    COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} <  ${CMAKE_CURRENT_SOURCE_DIR}/dwarf++.hh >> to_string.cc
+    COMMAND ${PYTHON_EXECUTABLE} ${ENUM_PRINT} -s _ -u --hex -x hi_user -x lo_user < ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/data.hh >> to_string.cc
+    COMMAND ${CMAKE_COMMAND} -E echo "DWARFPP_END_NAMESPACE" >> to_string.cc
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dwarf)
 
-
-
-add_library(elf++ STATIC ${elf_sources} ${CMAKE_CURRENT_SOURCE_DIR}/elf/to_string.cc)
+add_library(elf++ STATIC
+    ${elf_sources}
+    ${CMAKE_CURRENT_BINARY_DIR}/elf/to_string.cc
+)
 set_target_properties(elf++ PROPERTIES
     PUBLIC_HEADER "${elf_headers}")
 
-add_library(dwarf++ STATIC ${dwarf_sources} ${CMAKE_CURRENT_SOURCE_DIR}/dwarf/to_string.cc)
+add_library(dwarf++ STATIC
+    ${dwarf_sources}
+    ${CMAKE_CURRENT_BINARY_DIR}/dwarf/to_string.cc
+)
 set_target_properties(dwarf++ PROPERTIES
     PUBLIC_HEADER "${dwarf_headers}")
 
+target_include_directories(elf++ PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(dwarf++ PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
