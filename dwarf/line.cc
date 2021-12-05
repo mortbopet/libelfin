@@ -11,11 +11,10 @@ using namespace std;
 DWARFPP_BEGIN_NAMESPACE
 
 static bool isAbsolute(const string& path) {
-#ifdef UNIX
-    return !path.empty() && path[0] == '/';
-#endif
 #ifdef WIN32
     return !path.empty() && (path.find(":/") != std::string::npos);
+#else
+    return !path.empty() && path[0] == '/';
 #endif
 }
 
