@@ -1,3 +1,9 @@
+A libelfin fork which seeks to:
+1. add CMake support
+2. allow compilation by compilers other than GCC
+
+----------
+
 [Libelfin](https://github.com/aclements/libelfin/) is a from-scratch
 C++11 library for reading ELF binaries and DWARFv4 debug information.
 
