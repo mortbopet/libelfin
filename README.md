@@ -1,6 +1,9 @@
+[![CMake build](https://github.com/mortbopet/libelfin/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/mortbopet/libelfin/actions/workflows/build.yml)
+
 A libelfin fork which seeks to:
 1. add CMake support
 2. allow compilation by compilers other than GCC
+3. Add CI to ensure that things build across a variety of compilers and systems.
 
 ----------
 
