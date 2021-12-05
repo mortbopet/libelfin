@@ -86,7 +86,8 @@ cursor::string(std::string &out)
         size_t size;
         const char *p = this->cstr(&size);
         out.resize(size);
-        memmove(&out.front(), p, size);
+        if(size != 0)
+            memmove(&out.front(), p, size);
 }
 
 const char *
