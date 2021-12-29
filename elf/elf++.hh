@@ -142,7 +142,7 @@ public:
  * will close fd when done, so the caller should dup the file
  * descriptor if it intends to continue using it.
  */
-std::shared_ptr<loader> create_mmap_loader(int fd);
+std::shared_ptr<loader> create_mmap_loader(const char* path);
 
 /**
  * An exception indicating that a section is not of the requested type.
