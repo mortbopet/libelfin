@@ -13,7 +13,13 @@ C++11 library for reading ELF binaries and DWARFv4 debug information.
 Quick start
 -----------
 
-`make`, and optionally `make install`.  You'll need GCC 4.7 or later.
+```shell
+git clone https://github.com/mortbopet/libelfin.git
+git submodule update --init
+cd libelfin && mkdir build && cd build
+cmake ..
+make -j
+```
 
 Features
 --------
