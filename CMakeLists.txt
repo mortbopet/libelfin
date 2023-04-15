@@ -49,6 +49,12 @@ add_library(dwarf++ STATIC
 )
 set_target_properties(dwarf++ PROPERTIES
     PUBLIC_HEADER "${dwarf_headers}")
+target_link_libraries(dwarf++ Threads::Threads)
+
+# Fix WASM build on linux - requires all objects to be built with pthreads enabled.
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    target_compile_options(dwarf++ PUBLIC -pthread)
+endif()
 
 target_include_directories(elf++ PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(dwarf++ PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
