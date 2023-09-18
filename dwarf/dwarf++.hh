@@ -1370,7 +1370,7 @@ value at_const_value(const die &d);
 bool at_const_expr(const die &d);
 die at_containing_type(const die &d);
 uint64_t at_count(const die &d, expr_context *ctx);
-expr_result at_data_member_location(const die &d, expr_context *ctx, taddr base, taddr pc);
+expr_result at_data_member_location(const die &d, expr_context *ctx, taddr base);
 bool at_declaration(const die &d);
 std::string at_description(const die &d);
 die at_discr(const die &d);
