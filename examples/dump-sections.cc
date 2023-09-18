@@ -13,13 +13,7 @@ int main(int argc, char **argv)
                 return 2;
         }
 
-        int fd = open(argv[1], O_RDONLY);
-        if (fd < 0) {
-                fprintf(stderr, "%s: %s\n", argv[1], strerror(errno));
-                return 1;
-        }
-
-        elf::elf f(elf::create_mmap_loader(fd));
+        elf::elf f(elf::create_mmap_loader(argv[1]));
         int i = 0;
         printf("  [Nr] %-16s %-16s %-16s %s\n",
                "Name", "Type", "Address", "Offset");
